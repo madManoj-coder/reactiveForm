@@ -1,4 +1,4 @@
-<h1 class="p-3 text-center alert-dark">ng-ReactiveForm</h1>
+<h1 class="p-3 text-center alert-primary">ng-ReactiveForm</h1>
 <div class="container">
     <div class="row">
         <div class="col-md-8 offset-md-2">
@@ -8,33 +8,116 @@
                     <div class="form-group">
                         <label for="username"><strong>Username <sup class="color">*</sup></strong></label>
                         <input type="text" formControlName="userName" class="form-control" id="username">
+                        <span class="color" *ngIf="f['userName'].touched && f['userName'].hasError('required')">
+                            <strong>Username is a required field</strong>
+                        </span>
+                        <ng-container *ngIf="userName.dirty">
+                            <span class="color" *ngIf="userName.hasError('pattern')">
+                                <strong>Please Enter valid values</strong>
+                            </span>
+                            <span class="color" *ngIf="userName.hasError('minlength')">
+                                <strong> Username minimum length should be
+                                    {{userName.errors?.['minlength'].requiredLength}}
+                                    and actual length is
+                                    {{userName.errors?.['minlength'].actualLength}}
+                                </strong>
+                            </span>
+                            <span class="color" *ngIf="userName.hasError('maxlength')">
+                                <strong>
+                                    Username maximam length should be
+                                    {{userName.errors?.['maxlength'].requiredLength}}
+                                    and actual length is
+                                    {{userName.errors?.['maxlength'].actualLength}}
+                                </strong>
+                            </span>
+                            <span class="color" *ngIf="userName.hasError('noSpaceErr')">
+                                <strong>
+                                    {{userName.errors?.['noSpaceErr']}}
+                                </strong>
+                            </span>
+                        </ng-container>
+
                     </div>
                     <div class="form-group">
                         <label for="email"><strong>Email <sup class="color">*</sup></strong></label>
                         <input type="text" formControlName="email" class="form-control" id="email">
+                        <span class="color" *ngIf="f['email'].touched && f['email'].hasError('required')">
+                            <strong>Email is the required field</strong>
+                        </span>
+                        <span class="color" *ngIf="f['email'].dirty && f['email'].hasError('pattern')">
+                            <strong>Please Enter valid Email id</strong>
+                        </span>
+                        <div class="text-primary" *ngIf="f['email'].pending">
+                            <div class="spinner-border text-primary mt-2" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            Checking Email
+                        </div>
+                        <span class="color" *ngIf="f['email'].dirty && f['email'].hasError('emailExistErr')">
+                            <strong>
+                                {{f['email'].errors?.['emailExistErr']}}
+                            </strong>
+                        </span>
+                        <span class="color-green" *ngIf="f['email'].valid">
+                            <strong>
+                                This Email id is available
+                            </strong>
+                        </span>
                     </div>
                     <div class="form-group">
                         <label for="empId"><strong>EmpId <sup class="color">*</sup></strong></label>
-                        <input type="text" formControlName="empId" class="form-control">
+                        <input type="text" placeholder="E126" formControlName="empId" class="form-control">
+                        <span class="color" *ngIf="f['empId'].touched && f['empId'].hasError('required')">
+                            <strong>EmpId is a required field</strong>
+                        </span>
+                        <span class="color" *ngIf="f['empId'].dirty && f['empId'].hasError('invalidEmpId')">
+                            <strong>
+                                {{f['empId'].errors?.['invalidEmpId']}}
+                            </strong>
+                        </span>
                     </div>
                     <p><strong>Gender <sup class="color">*</sup></strong></p>
                     <div class="form-group">
                         <label for="male">
-                            <input type="radio" name="gender">
+                            <input type="radio" formControlName="gender" value="male" name="gender" id="male">
                             Male
                         </label>
                         <label for="female" class="ml-2">
-                            <input type="radio" name="gender">
+                            <input type="radio" formControlName="gender" value="female" name="gender" id="female">
                             Female
                         </label>
-                        <label for="transgender" class="ml-2">
-                            <input type="radio" name="gender">
-                            Transgender
+                        <label for="others" class="ml-2">
+                            <input type="radio" formControlName="gender" value="others" name="gender" id="others">
+                            Others
                         </label>
+                    </div>
+                    <div formArrayName="skills">
+                        <h4>Skills :-</h4>
+                        <div class="row mb-4" *ngFor="let skill of skillsFormArr.controls; let i = index">
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" [formControlName]="i">
+                                <span class="color" *ngIf='skill.touched && skill.hasError("required")'>
+                                    <strong>Skills is the required field</strong>
+                                </span>
+                            </div>
+                            <div class="col-md-3" *ngIf="i > 0">
+                                <button class="btn btn-outline-danger" type="button" (click)="onRemoveSkill(i)">
+                                    <strong>Remove</strong>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button class="btn btn-outline-primary" [disabled]="skillsFormArr.length >= 5"
+                                    (click)="onAddSkill()" type="button"><strong>Add Skill</strong>
+                                </button>
+                            </div>
+                        </div>
+                        <hr>
                     </div>
                     <div class="row">
                         <div class="col-md-6" formGroupName="currentAddress">
-                            <h4 class="alert-success p-3 text-center">Current Address</h4>
+                            <h4 class="text-center">Current Address</h4>
                             <div class="form-group">
                                 <!-- <input type="text" formControlName="country" 
                                 class="form-control" placeholder="Country"> -->
@@ -44,22 +127,35 @@
                                         {{con.Country}}
                                     </option>
                                 </select>
+                                <span class="color"
+                                    *ngIf="f['currentAddress'].get('country')?.touched && f['currentAddress'].get('country')?.hasError('required')">
+                                    <strong>Country is a required field. </strong>
+                                </span>
                             </div>
                             <div class="form-group">
-                                <input type="text" formControlName="state" 
-                                class="form-control" placeholder="State">
+                                <input type="text" formControlName="state" class="form-control" placeholder="State">
+                                <span class="color"
+                                    *ngIf="f['currentAddress'].get('state')?.touched && f['currentAddress'].get('state')?.hasError('required')">
+                                    <strong>State is a required field. </strong>
+                                </span>
                             </div>
                             <div class="form-group">
-                                <input type="text" formControlName="city" 
-                                class="form-control" placeholder="City">
+                                <input type="text" formControlName="city" class="form-control" placeholder="City">
+                                <span class="color"
+                                    *ngIf="f['currentAddress'].get('city')?.touched && f['currentAddress'].get('city')?.hasError('required')">
+                                    <strong>City is a required field. </strong>
+                                </span>
                             </div>
                             <div class="form-group">
-                                <input type="text" formControlName="zipcode" 
-                                class="form-control" placeholder="Zipcode">
+                                <input type="text" formControlName="zipcode" class="form-control" placeholder="Zipcode">
+                                <span class="color"
+                                    *ngIf="f['currentAddress'].get('zipcode')?.touched && f['currentAddress'].get('zipcode')?.hasError('required')">
+                                    <strong>Zipcode is a required field. </strong>
+                                </span>
                             </div>
                         </div>
                         <div class="col-md-6" formGroupName="permanentAddress">
-                            <h4 class="alert-success p-3 text-center">Permanent Address</h4>
+                            <h4 class="text-center">Permanent Address</h4>
                             <div class="form-group">
                                 <!-- <input type="text" formControlName="country" 
                                 class="form-control" placeholder="Country"> -->
@@ -68,19 +164,33 @@
                                     <option [value]="con.Country" *ngFor="let con of countryInfo">
                                         {{con.Country}}
                                     </option>
+
                                 </select>
+                                <span class="color"
+                                    *ngIf="f['permanentAddress'].get('country')?.touched && f['permanentAddress'].get('country')?.hasError('required')">
+                                    <strong>Country is a required field. </strong>
+                                </span>
                             </div>
                             <div class="form-group">
-                                <input type="text" formControlName="state" 
-                                class="form-control" placeholder="State">
+                                <input type="text" formControlName="state" class="form-control" placeholder="State">
+                                <span class="color"
+                                    *ngIf="f['permanentAddress'].get('state')?.touched && f['permanentAddress'].get('state')?.hasError('required')">
+                                    <strong>State is a required field. </strong>
+                                </span>
                             </div>
                             <div class="form-group">
-                                <input type="text" formControlName="city" 
-                                class="form-control" placeholder="City">
+                                <input type="text" formControlName="city" class="form-control" placeholder="City">
+                                <span class="color"
+                                    *ngIf="f['permanentAddress'].get('city')?.touched && f['permanentAddress'].get('city')?.hasError('required')">
+                                    <strong>City is a required field. </strong>
+                                </span>
                             </div>
                             <div class="form-group">
-                                <input type="text" formControlName="zipcode" 
-                                class="form-control" placeholder="Zipcode">
+                                <input type="text" formControlName="zipcode" class="form-control" placeholder="Zipcode">
+                                <span class="color"
+                                    *ngIf="f['permanentAddress'].get('zipcode')?.touched && f['permanentAddress'].get('zipcode')?.hasError('required')">
+                                    <strong>Zipcode is a required field. </strong>
+                                </span>
                             </div>
                         </div>
                         <div class="col-12 mb-2">
@@ -93,14 +203,27 @@
                     <div class="form-group">
                         <label for="password"><strong>Password <sup class="color">*</sup></strong></label>
                         <input type="text" class="form-control" formControlName="password" id="password">
+                        <span class="color" *ngIf="f['password'].touched && f['password'].hasError('required')">
+                            <strong>Password is the required field.</strong>
+                        </span>
+                        <span class="color" *ngIf="f['password'].dirty && f['password'].hasError('pattern')">
+                            <strong>Please enter valid password</strong>
+                        </span>
                     </div>
                     <div class="form-group">
                         <label for="confirmPassword"><strong>Confirm Password <sup
                                     class="color">*</sup></strong></label>
                         <input type="text" class="form-control" formControlName="confirmPassword" id="confirmPassword">
+                        <span class="color"
+                            *ngIf="f['confirmPassword'].dirty && f['confirmPassword'].hasError('passAndConfErr')">
+                            <strong>
+                                {{f['confirmPassword'].errors?.['passAndConfErr']}}
+                            </strong>
+                        </span>
                     </div>
                     <div class="text-right">
-                        <button type="submit" class="btn alert-primary btn-primary"><strong>Sign Up</strong></button>
+                        <button type="submit" [disabled]="signUpForm.invalid"
+                        class="btn alert-primary btn-primary"><strong>Sign Up</strong></button>
                     </div>
                 </form>
                 <!-- <hr>
